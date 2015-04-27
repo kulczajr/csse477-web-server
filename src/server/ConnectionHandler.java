@@ -101,14 +101,15 @@ public class ConnectionHandler implements Runnable {
 			// Protocol.BAD_REQUEST_CODE and Protocol.NOT_SUPPORTED_CODE
 			int status = pe.getStatus();
 			if (status == Protocol.BAD_REQUEST_CODE) {
-				response = HttpResponseFactory
-						.create400BadRequest(null, Protocol.CLOSE);
+				response = HttpResponseFactory.create400BadRequest(null,
+						Protocol.CLOSE);
 			}
 			// TODO: Handle version not supported code as well
 		} catch (Exception e) {
 			e.printStackTrace();
 			// For any other error, we will create bad request response as well
-			response = HttpResponseFactory.create400BadRequest(request.getMethod(), Protocol.CLOSE);
+			response = HttpResponseFactory.create400BadRequest(
+					request.getMethod(), Protocol.CLOSE);
 		}
 
 		if (response != null) {
@@ -168,24 +169,34 @@ public class ConnectionHandler implements Runnable {
 						file = new File(location);
 						if (file.exists()) {
 							// Lets create 200 OK response
-							response = HttpResponseFactory.create200OK(requestProtocolMethod, file,
-									Protocol.CLOSE);
+							response = HttpResponseFactory
+									.create200OK(requestProtocolMethod, file,
+											Protocol.CLOSE, request.getBody());
 						} else {
 							// File does not exist so lets create 404 file not
 							// found code
-							response = HttpResponseFactory
-									.create404NotFound(requestProtocolMethod, Protocol.CLOSE);
+							response = HttpResponseFactory.create404NotFound(
+									requestProtocolMethod, Protocol.CLOSE);
 						}
 					} else { // Its a file
 								// Lets create 200 OK response
-						response = HttpResponseFactory.create200OK(requestProtocolMethod, file,
-								Protocol.CLOSE);
+						response = HttpResponseFactory.create200OK(
+								requestProtocolMethod, file, Protocol.CLOSE, request.getBody());
 					}
 				} else {
-					// File does not exist so lets create 404 file not found
-					// code
-					response = HttpResponseFactory
-							.create404NotFound(requestProtocolMethod, Protocol.CLOSE);
+					if (requestProtocolMethod.equalsIgnoreCase(Protocol.POST)
+							|| requestProtocolMethod
+									.equalsIgnoreCase(Protocol.PUT)) {
+						response = HttpResponseFactory
+								.create200OK(requestProtocolMethod, file,
+										Protocol.CLOSE, request.getBody());
+
+					} else {
+						// File does not exist so lets create 404 file not found
+						// code
+						response = HttpResponseFactory.create404NotFound(
+								requestProtocolMethod, Protocol.CLOSE);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -196,7 +207,8 @@ public class ConnectionHandler implements Runnable {
 		// So this is a temporary patch for that problem and should be removed
 		// after a response object is created for protocol version mismatch.
 		if (response == null) {
-			response = HttpResponseFactory.create400BadRequest(request.getMethod(), Protocol.CLOSE);
+			response = HttpResponseFactory.create400BadRequest(
+					request.getMethod(), Protocol.CLOSE);
 		}
 
 		try {
