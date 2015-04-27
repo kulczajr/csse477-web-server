@@ -20,7 +20,7 @@
  */
 
  
-package protocol;
+package impl;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -29,6 +29,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import protocol.ProtocolException;
 
 /**
  * Represents a request object for HTTP.

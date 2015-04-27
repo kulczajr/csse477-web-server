@@ -21,6 +21,8 @@
  
 package protocol;
 
+import impl.Protocol;
+
 /**
  * This class is used to represent exceptions in processing
  * HTTP protocol.

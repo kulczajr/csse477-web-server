@@ -19,22 +19,24 @@
  * 
  */
  
-package protocol;
+package impl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
+import protocol.AbstractHttpResponse;
 
 /**
  * Represents a response object for HTTP.
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
-public class HttpResponse {
+public class HttpGetResponse extends AbstractHttpResponse {
 	private String version;
 	private int status;
 	private String phrase;
@@ -51,65 +53,12 @@ public class HttpResponse {
 	 * @param header The header field map.
 	 * @param file The file to be sent.
 	 */
-	public HttpResponse(String version, int status, String phrase, Map<String, String> header, File file) {
-		this.version = version;
+	public HttpGetResponse(int status, String phrase, File file) {
+		this.version = Protocol.VERSION;
 		this.status = status;
 		this.phrase = phrase;
-		this.header = header;
+		this.header = new HashMap<String, String>();
 		this.file = file;
-	}
-
-	/**
-	 * Gets the version of the HTTP.
-	 * 
-	 * @return the version
-	 */
-	public String getVersion() {
-		return version;
-	}
-
-	/**
-	 * Gets the status code of the response object.
-	 * @return the status
-	 */
-	public int getStatus() {
-		return status;
-	}
-
-	/**
-	 * Gets the status phrase of the response object.
-	 * 
-	 * @return the phrase
-	 */
-	public String getPhrase() {
-		return phrase;
-	}
-	
-	/**
-	 * The file to be sent.
-	 * 
-	 * @return the file
-	 */
-	public File getFile() {
-		return file;
-	}
-
-	/**
-	 * Returns the header fields associated with the response object.
-	 * @return the header
-	 */
-	public Map<String, String> getHeader() {
-		// Lets return the unmodifable view of the header map
-		return Collections.unmodifiableMap(header);
-	}
-
-	/**
-	 * Maps a key to value in the header map.
-	 * @param key A key, e.g. "Host"
-	 * @param value A value, e.g. "www.rose-hulman.edu"
-	 */
-	public void put(String key, String value) {
-		this.header.put(key, value);
 	}
 	
 	/**
