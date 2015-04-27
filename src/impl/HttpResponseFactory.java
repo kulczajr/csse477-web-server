@@ -62,11 +62,12 @@ public class HttpResponseFactory {
 	 * 
 	 * @param file The {@link File} to be sent.
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
+	 * @param body 
 	 * @return A {@link AbstractHttpResponse} object represent 200 status.
 	 */
-	public static AbstractHttpResponse create200OK(String responseType, File file, String connection) {
+	public static AbstractHttpResponse create200OK(String responseType, File file, String connection, char[] body) {
 		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.OK_CODE, 
-				Protocol.OK_TEXT, file);
+				Protocol.OK_TEXT, file, body);
 		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
@@ -90,6 +91,7 @@ public class HttpResponseFactory {
 			response.put(Protocol.CONTENT_TYPE, mime);
 		}
 		
+		
 		return response;
 	}
 	
@@ -101,7 +103,7 @@ public class HttpResponseFactory {
 	 */
 	public static AbstractHttpResponse create400BadRequest(String responseType, String connection) {
 		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.BAD_REQUEST_CODE, 
-				Protocol.BAD_REQUEST_TEXT, null);
+				Protocol.BAD_REQUEST_TEXT, null, null);
 		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
@@ -117,7 +119,7 @@ public class HttpResponseFactory {
 	 */
 	public static AbstractHttpResponse create404NotFound(String responseType, String connection) {
 		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.NOT_FOUND_CODE, 
-				Protocol.NOT_FOUND_TEXT, null);
+				Protocol.NOT_FOUND_TEXT, null, null);
 		
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);

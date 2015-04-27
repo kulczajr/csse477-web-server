@@ -28,7 +28,10 @@
  
 package protocol;
 
+import impl.HttpDeleteResponse;
 import impl.HttpGetResponse;
+import impl.HttpPostResponse;
+import impl.HttpPutResponse;
 import impl.Protocol;
 
 import java.io.File;
@@ -42,24 +45,33 @@ import java.util.Map;
  * @author Chandan R. Rupakheti (rupakhcr@clarkson.edu)
  */
 public abstract class AbstractHttpResponse {
-	public static final String version = "version";
-	public static final int status = 0;
-	public static final String phrase = "phrase";
-	public static final Map<String, String> header = new HashMap<String, String>();
-	public static final File file = null;
+	protected String version = "version";
+	protected int status = 0;
+	protected String phrase = "phrase";
+	protected Map<String, String> header = new HashMap<String, String>();
+	protected File file = null;
+	protected char[] body = new char[0];
 
+	public AbstractHttpResponse(int status, String phrase, File file, char[] body) {
+		this.version = Protocol.VERSION;
+		this.status = status;
+		this.phrase = phrase;
+		this.header = new HashMap<String, String>();
+		this.file = file;
+		this.body = body;
+	}
 	
-	public static AbstractHttpResponse getResponse(String responseType, int status, String phrase, File file) {
+	public static AbstractHttpResponse getResponse(String responseType, int status, String phrase, File file, char[] body) {
 		if (responseType == Protocol.GET) {
-			return new HttpGetResponse(status, phrase, file);
+			return new HttpGetResponse(status, phrase, file, body);
 		} else if (responseType == Protocol.POST) {
-			return new HttpGetResponse(status, phrase, file);
+			return new HttpPostResponse(status, phrase, file, body);
 		} else if (responseType == Protocol.PUT) {
-			return new HttpGetResponse(status, phrase, file);
+			return new HttpPutResponse(status, phrase, file, body);
 		} else if (responseType == Protocol.DELETE) {
-			return new HttpGetResponse(status, phrase, file);
+			return new HttpDeleteResponse(status, phrase, file, body);
 		} else {
-			return new HttpGetResponse(status, phrase, file);
+			return new HttpGetResponse(status, phrase, file, body);
 		}
 		
 	}
@@ -114,9 +126,8 @@ public abstract class AbstractHttpResponse {
 	 * @param value A value, e.g. "www.rose-hulman.edu"
 	 */
 	public void put(String key, String value) {
-		AbstractHttpResponse.header.put(key, value);
+		header.put(key, value);
 	}
 	
 	public abstract void write(OutputStream outStream) throws Exception;
-	public abstract String toString();
 }

@@ -21,11 +21,10 @@
  
 package impl;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 import protocol.AbstractHttpResponse;
@@ -35,8 +34,8 @@ import protocol.AbstractHttpResponse;
  * 
  * @author Chandan R. Rupakheti (rupakhet@rose-hulman.edu)
  */
-public class HttpGetResponse extends AbstractHttpResponse {
-	
+public class HttpDeleteResponse extends AbstractHttpResponse {
+
 	/**
 	 * Constructs a HttpResponse object using supplied parameter
 	 * 
@@ -46,7 +45,7 @@ public class HttpGetResponse extends AbstractHttpResponse {
 	 * @param header The header field map.
 	 * @param file The file to be sent.
 	 */
-	public HttpGetResponse(int status, String phrase, File file, char[] body) {
+	public HttpDeleteResponse(int status, String phrase, File file, char[] body) {
 		super(status, phrase, file, body);
 	}
 	
@@ -80,18 +79,7 @@ public class HttpGetResponse extends AbstractHttpResponse {
 
 		// We are reading a file
 		if(this.getStatus() == Protocol.OK_CODE && file != null) {
-			// Process text documents
-			FileInputStream fileInStream = new FileInputStream(file);
-			BufferedInputStream inStream = new BufferedInputStream(fileInStream, Protocol.CHUNK_LENGTH);
-			
-			byte[] buffer = new byte[Protocol.CHUNK_LENGTH];
-			int bytesRead = 0;
-			// While there is some bytes to read from file, read each chunk and send to the socket out stream
-			while((bytesRead = inStream.read(buffer)) != -1) {
-				out.write(buffer, 0, bytesRead);
-			}
-			// Close the file input stream, we are done reading
-			inStream.close();
+			file.delete();
 		}
 		
 		// Flush the data so that outStream sends everything through the socket 
