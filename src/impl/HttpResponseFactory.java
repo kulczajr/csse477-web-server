@@ -19,14 +19,15 @@
  * 
  */
  
-package protocol;
+package impl;
 
 import java.io.File;
 import java.net.FileNameMap;
 import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
+
+import protocol.AbstractHttpResponse;
 
 /**
  * This is a factory to produce various kind of HTTP responses.
@@ -37,10 +38,10 @@ public class HttpResponseFactory {
 	/**
 	 * Convenience method for adding general header to the supplied response object.
 	 * 
-	 * @param response The {@link HttpResponse} object whose header needs to be filled in.
+	 * @param response The {@link AbstractHttpResponse} object whose header needs to be filled in.
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
 	 */
-	private static void fillGeneralHeader(HttpResponse response, String connection) {
+	private static void fillGeneralHeader(AbstractHttpResponse response, String connection) {
 		// Lets add Connection header
 		response.put(Protocol.CONNECTION, connection);
 
@@ -56,16 +57,16 @@ public class HttpResponseFactory {
 	}
 	
 	/**
-	 * Creates a {@link HttpResponse} object for sending the supplied file with supplied connection
+	 * Creates a {@link AbstractHttpResponse} object for sending the supplied file with supplied connection
 	 * parameter.
 	 * 
 	 * @param file The {@link File} to be sent.
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 200 status.
+	 * @return A {@link AbstractHttpResponse} object represent 200 status.
 	 */
-	public static HttpResponse create200OK(File file, String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.OK_CODE, 
-				Protocol.OK_TEXT, new HashMap<String, String>(), file);
+	public static AbstractHttpResponse create200OK(String responseType, File file, String connection) {
+		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.OK_CODE, 
+				Protocol.OK_TEXT, file);
 		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
@@ -93,14 +94,14 @@ public class HttpResponseFactory {
 	}
 	
 	/**
-	 * Creates a {@link HttpResponse} object for sending bad request response.
+	 * Creates a {@link AbstractHttpResponse} object for sending bad request response.
 	 * 
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 400 status.
+	 * @return A {@link AbstractHttpResponse} object represent 400 status.
 	 */
-	public static HttpResponse create400BadRequest(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.BAD_REQUEST_CODE, 
-				Protocol.BAD_REQUEST_TEXT, new HashMap<String, String>(), null);
+	public static AbstractHttpResponse create400BadRequest(String responseType, String connection) {
+		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.BAD_REQUEST_CODE, 
+				Protocol.BAD_REQUEST_TEXT, null);
 		
 		// Lets fill up header fields with more information
 		fillGeneralHeader(response, connection);
@@ -109,14 +110,14 @@ public class HttpResponseFactory {
 	}
 	
 	/**
-	 * Creates a {@link HttpResponse} object for sending not found response.
+	 * Creates a {@link AbstractHttpResponse} object for sending not found response.
 	 * 
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 404 status.
+	 * @return A {@link AbstractHttpResponse} object represent 404 status.
 	 */
-	public static HttpResponse create404NotFound(String connection) {
-		HttpResponse response = new HttpResponse(Protocol.VERSION, Protocol.NOT_FOUND_CODE, 
-				Protocol.NOT_FOUND_TEXT, new HashMap<String, String>(), null);
+	public static AbstractHttpResponse create404NotFound(String responseType, String connection) {
+		AbstractHttpResponse response = AbstractHttpResponse.getResponse(responseType, Protocol.NOT_FOUND_CODE, 
+				Protocol.NOT_FOUND_TEXT, null);
 		
 		// Lets fill up the header fields with more information
 		fillGeneralHeader(response, connection);
@@ -125,23 +126,23 @@ public class HttpResponseFactory {
 	}
 	
 	/**
-	 * Creates a {@link HttpResponse} object for sending version not supported response.
+	 * Creates a {@link AbstractHttpResponse} object for sending version not supported response.
 	 * 
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 505 status.
+	 * @return A {@link AbstractHttpResponse} object represent 505 status.
 	 */
-	public static HttpResponse create505NotSupported(String connection) {
+	public static AbstractHttpResponse create505NotSupported(String responseType, String connection) {
 		// TODO fill in this method
 		return null;
 	}
 	
 	/**
-	 * Creates a {@link HttpResponse} object for sending file not modified response.
+	 * Creates a {@link AbstractHttpResponse} object for sending file not modified response.
 	 * 
 	 * @param connection Supported values are {@link Protocol#OPEN} and {@link Protocol#CLOSE}.
-	 * @return A {@link HttpResponse} object represent 304 status.
+	 * @return A {@link AbstractHttpResponse} object represent 304 status.
 	 */
-	public static HttpResponse create304NotModified(String connection) {
+	public static AbstractHttpResponse create304NotModified(String responseType, String connection) {
 		// TODO fill in this method
 		return null;
 	}
