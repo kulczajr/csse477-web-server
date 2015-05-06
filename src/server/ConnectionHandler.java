@@ -24,12 +24,17 @@ package server;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.StringTokenizer;
 
 import impl.HttpRequest;
 import impl.HttpResponseFactory;
 import impl.Protocol;
 import protocol.AbstractHttpResponse;
+import protocol.IPlugin;
 import protocol.ProtocolException;
 
 /**
@@ -101,7 +106,7 @@ public class ConnectionHandler implements Runnable {
 			// Protocol.BAD_REQUEST_CODE and Protocol.NOT_SUPPORTED_CODE
 			int status = pe.getStatus();
 			if (status == Protocol.BAD_REQUEST_CODE) {
-				response = HttpResponseFactory.create400BadRequest(null,
+				response = HttpResponseFactory.create400BadRequest(Protocol.GET,
 						Protocol.CLOSE);
 			}
 			// TODO: Handle version not supported code as well
@@ -144,6 +149,7 @@ public class ConnectionHandler implements Runnable {
 				// "request.version" string ignoring the case of the letters in
 				// both strings
 				// TODO: Fill in the rest of the code here
+				// If we have a viable request...
 			} else if (requestProtocolMethod.equalsIgnoreCase(Protocol.GET)
 					|| requestProtocolMethod.equalsIgnoreCase(Protocol.POST)
 					|| requestProtocolMethod.equalsIgnoreCase(Protocol.PUT)
@@ -159,6 +165,13 @@ public class ConnectionHandler implements Runnable {
 				String rootDirectory = server.getRootDirectory();
 				// Combine them together to form absolute file path
 				File file = new File(rootDirectory + uri);
+				
+				int trim = request.getUri().indexOf("MyPlugin");
+				if (trim > 0) {
+					String dir = request.getUri().substring(0, trim);
+					file = new File(rootDirectory + dir);
+				}
+				
 				// Check if the file exists
 				if (file.exists()) {
 					if (file.isDirectory()) {
@@ -169,9 +182,9 @@ public class ConnectionHandler implements Runnable {
 						file = new File(location);
 						if (file.exists()) {
 							// Lets create 200 OK response
-							response = HttpResponseFactory
-									.create200OK(requestProtocolMethod, file,
-											Protocol.CLOSE, request.getBody());
+							response = HttpResponseFactory.create200OK(
+									requestProtocolMethod, file,
+									Protocol.CLOSE, request.getBody());
 						} else {
 							// File does not exist so lets create 404 file not
 							// found code
@@ -181,15 +194,18 @@ public class ConnectionHandler implements Runnable {
 					} else { // Its a file
 								// Lets create 200 OK response
 						response = HttpResponseFactory.create200OK(
-								requestProtocolMethod, file, Protocol.CLOSE, request.getBody());
+								requestProtocolMethod, file, Protocol.CLOSE,
+								request.getBody());
 					}
 				} else {
+					// If the file doesn't exist check if it's a post or put
+					// method - then it's still good to go
 					if (requestProtocolMethod.equalsIgnoreCase(Protocol.POST)
 							|| requestProtocolMethod
 									.equalsIgnoreCase(Protocol.PUT)) {
-						response = HttpResponseFactory
-								.create200OK(requestProtocolMethod, file,
-										Protocol.CLOSE, request.getBody());
+						response = HttpResponseFactory.create200OK(
+								requestProtocolMethod, file, Protocol.CLOSE,
+								request.getBody());
 
 					} else {
 						// File does not exist so lets create 404 file not found
@@ -213,7 +229,38 @@ public class ConnectionHandler implements Runnable {
 
 		try {
 			// Write response and we are all done so close the socket
-			response.write(outStream);
+			response.setWriter(outStream);
+			
+			String uri = request.getUri();
+			
+			StringTokenizer tok = new StringTokenizer(uri, "/");
+			
+			File dir = new File("plugins");
+    		URL loadPath;
+			try {
+				loadPath = dir.toURI().toURL();
+				URL[] classUrl = new URL[]{loadPath};
+				ClassLoader cl = new URLClassLoader(classUrl);
+
+				Class loadedClass;
+				if (tok.hasMoreElements() && !uri.contains(".")) {
+					loadedClass = cl.loadClass("plugins." + tok.nextToken());
+				} else {
+					loadedClass = cl.loadClass("plugins.MyPlugin");
+				}
+				IPlugin plugin = (IPlugin)loadedClass.newInstance();
+				
+				if (tok.hasMoreTokens()) {
+					plugin.doResponse(request, response, tok.nextToken());
+				} else {
+					plugin.doResponse(request, response, "");
+				}
+				
+			} catch (MalformedURLException | ClassNotFoundException | InstantiationException | IllegalAccessException e1) {
+				e1.printStackTrace();
+			}
+			
+			response.closeWriter();
 			// System.out.println(response);
 			socket.close();
 		} catch (Exception e) {

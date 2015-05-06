@@ -18,11 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/lgpl.html>.
  * 
  */
- 
+
 package impl;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.util.HashMap;
@@ -40,57 +42,51 @@ public class HttpPutResponse extends AbstractHttpResponse {
 	/**
 	 * Constructs a HttpResponse object using supplied parameter
 	 * 
-	 * @param version The http version.
-	 * @param status The response status.
-	 * @param phrase The response status phrase.
-	 * @param header The header field map.
-	 * @param file The file to be sent.
+	 * @param version
+	 *            The http version.
+	 * @param status
+	 *            The response status.
+	 * @param phrase
+	 *            The response status phrase.
+	 * @param header
+	 *            The header field map.
+	 * @param file
+	 *            The file to be sent.
 	 */
 	public HttpPutResponse(int status, String phrase, File file, char[] body) {
 		super(status, phrase, file, body);
 	}
-	
+
 	/**
 	 * Writes the data of the http response object to the output stream.
 	 * 
-	 * @param outStream The output stream
+	 * @param outStream
+	 *            The output stream
 	 * @throws Exception
 	 */
 	public void write(OutputStream outStream) throws Exception {
-		BufferedOutputStream out = new BufferedOutputStream(outStream, Protocol.CHUNK_LENGTH);
+		BufferedOutputStream out = new BufferedOutputStream(outStream,
+				Protocol.CHUNK_LENGTH);
 
 		// First status line
-		String line = this.version + Protocol.SPACE + this.status + Protocol.SPACE + this.phrase + Protocol.CRLF;
+		String line = this.version + Protocol.SPACE + this.status
+				+ Protocol.SPACE + this.phrase + Protocol.CRLF;
 		out.write(line.getBytes());
-		
+
 		// Write header fields if there is something to write in header field
-		if(header != null && !header.isEmpty()) {
-			for(Map.Entry<String, String> entry : header.entrySet()) {
+		if (header != null && !header.isEmpty()) {
+			for (Map.Entry<String, String> entry : header.entrySet()) {
 				String key = entry.getKey();
 				String value = entry.getValue();
-				
+
 				// Write each header field line
-				line = key + Protocol.SEPERATOR + Protocol.SPACE + value + Protocol.CRLF;
+				line = key + Protocol.SEPERATOR + Protocol.SPACE + value
+						+ Protocol.CRLF;
 				out.write(line.getBytes());
 			}
 		}
-
-		// Write a blank line
-		out.write(Protocol.CRLF.getBytes());
-
-		// We are reading a file
-		if(this.getStatus() == Protocol.OK_CODE) {
-            FileWriter f2;
-
-            f2 = new FileWriter(file, true);
-            f2.write(body);
-            f2.close();
-		}
-		
-		// Flush the data so that outStream sends everything through the socket 
-		out.flush();
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
@@ -101,22 +97,22 @@ public class HttpPutResponse extends AbstractHttpResponse {
 		buffer.append(Protocol.SPACE);
 		buffer.append(this.phrase);
 		buffer.append(Protocol.LF);
-		
-		for(Map.Entry<String, String> entry : this.header.entrySet()) {
+
+		for (Map.Entry<String, String> entry : this.header.entrySet()) {
 			buffer.append(entry.getKey());
 			buffer.append(Protocol.SEPERATOR);
 			buffer.append(Protocol.SPACE);
 			buffer.append(entry.getValue());
 			buffer.append(Protocol.LF);
 		}
-		
+
 		buffer.append(Protocol.LF);
-		if(file != null) {
+		if (file != null) {
 			buffer.append("Data: ");
 			buffer.append(this.file.getAbsolutePath());
 		}
 		buffer.append("\n----------------------------------\n");
 		return buffer.toString();
 	}
-	
+
 }

@@ -35,6 +35,7 @@ import impl.HttpPutResponse;
 import impl.Protocol;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,8 +50,9 @@ public abstract class AbstractHttpResponse {
 	protected int status = 0;
 	protected String phrase = "phrase";
 	protected Map<String, String> header = new HashMap<String, String>();
-	protected File file = null;
+	public File file = null;
 	protected char[] body = new char[0];
+	protected OutputStream out;
 
 	public AbstractHttpResponse(int status, String phrase, File file, char[] body) {
 		this.version = Protocol.VERSION;
@@ -62,13 +64,13 @@ public abstract class AbstractHttpResponse {
 	}
 	
 	public static AbstractHttpResponse getResponse(String responseType, int status, String phrase, File file, char[] body) {
-		if (responseType == Protocol.GET) {
+		if (responseType.equalsIgnoreCase(Protocol.GET)) {
 			return new HttpGetResponse(status, phrase, file, body);
-		} else if (responseType == Protocol.POST) {
+		} else if (responseType.equalsIgnoreCase(Protocol.POST)) {
 			return new HttpPostResponse(status, phrase, file, body);
-		} else if (responseType == Protocol.PUT) {
+		} else if (responseType.equalsIgnoreCase(Protocol.PUT)) {
 			return new HttpPutResponse(status, phrase, file, body);
-		} else if (responseType == Protocol.DELETE) {
+		} else if (responseType.equalsIgnoreCase(Protocol.DELETE)) {
 			return new HttpDeleteResponse(status, phrase, file, body);
 		} else {
 			return new HttpGetResponse(status, phrase, file, body);
@@ -130,4 +132,26 @@ public abstract class AbstractHttpResponse {
 	}
 	
 	public abstract void write(OutputStream outStream) throws Exception;
+
+	/**
+	 * @param outStream
+	 */
+	public void setWriter(OutputStream outStream) {
+		out = outStream;
+	}
+	
+	public OutputStream getWriter() {
+		return out;
+	}
+	
+	public void closeWriter() throws IOException {
+		out.flush();
+	}
+
+	/**
+	 * @return
+	 */
+	public char[] getBody() {
+		return body;
+	}
 }
