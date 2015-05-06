@@ -73,17 +73,6 @@ public class HttpDeleteResponse extends AbstractHttpResponse {
 				out.write(line.getBytes());
 			}
 		}
-
-		// Write a blank line
-		out.write(Protocol.CRLF.getBytes());
-
-		// We are reading a file
-		if(this.getStatus() == Protocol.OK_CODE && file != null) {
-			file.delete();
-		}
-		
-		// Flush the data so that outStream sends everything through the socket 
-		out.flush();
 	}
 	
 	@Override

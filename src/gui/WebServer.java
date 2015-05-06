@@ -27,10 +27,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.*;
 
 import server.Server;
+import server.WatchDir;
 
 /**
  * The application window for the {@link Server}, where you can update
@@ -56,6 +61,8 @@ public class WebServer extends JFrame {
 	
 	private Server server;
 	private ServiceRateUpdater rateUpdater;
+	
+	private WatchDir watchDir;
 	
 	/**
 	 * For constantly updating the service rate in the GUI.
@@ -196,6 +203,17 @@ public class WebServer extends JFrame {
 				
 				// Also run the service rate updater thread
 				new Thread(rateUpdater).start();
+				
+				// Run the Watch Directory Service
+				File dir = new File("src/plugins");
+				Path dirPath = Paths.get(dir.getAbsolutePath());
+				try {
+					watchDir = new WatchDir(dirPath, false);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
+				new Thread(watchDir).start();
 			}
 		});
 		
